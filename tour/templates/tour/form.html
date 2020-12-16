@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Akfa tour</title>
+    <link rel="stylesheet" href="{% static 'tour/css/form_style.css' %}">
+</head>
+<body>
+
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="container">
+    <fieldset>
+        <legend><span class="number">1</span> Mehmon haqidagi malumotlar</legend>
+        {{ guest_form }}
+    </fieldset>
+
+    <fieldset>
+        <legend><span class="number">2</span> Taklif qiluvchining malumotlari</legend>
+        {{ personal_manager_form }}
+    </fieldset>
+    </div>
+
+
+    <button type="submit">Jo'natish</button>
+
+</form>
+
+</body>
+</html>
