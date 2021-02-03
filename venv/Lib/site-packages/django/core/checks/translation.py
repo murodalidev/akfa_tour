@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.utils.translation import get_supported_language_variant
 from django.utils.translation.trans_real import language_code_re
 
 from . import Error, Tags, register
@@ -56,9 +55,7 @@ def check_setting_languages_bidi(app_configs, **kwargs):
 @register(Tags.translation)
 def check_language_settings_consistent(app_configs, **kwargs):
     """Error if language settings are not consistent with each other."""
-    try:
-        get_supported_language_variant(settings.LANGUAGE_CODE)
-    except LookupError:
+    available_tags = {i for i, _ in settings.LANGUAGES} | {'en-us'}
+    if settings.LANGUAGE_CODE not in available_tags:
         return [E004]
-    else:
-        return []
+    return []

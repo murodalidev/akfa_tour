@@ -8,6 +8,7 @@ class GuestInfoForm(forms.ModelForm):
     class Meta:
         model = GuestInfo
         fields = ('guest_full_name', 'foreign_company', 'passport_id', 'citizenship')
+        autocomplete_fields = ('citizenship', )
 
 
 class PersonalManagerForm(forms.ModelForm):

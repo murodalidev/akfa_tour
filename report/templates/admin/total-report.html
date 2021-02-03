@@ -1,0 +1,130 @@
+
+{% extends 'admin/change_list.html' %}
+{% load report_tag humanize %}
+{% load admin_urls static admin_list %}
+
+{% block content %}
+  <div id="content-main">
+    {% block object-tools %}
+        <ul class="object-tools">
+          {% block object-tools-items %}
+            {% change_list_object_tools %}
+          {% endblock %}
+        </ul>
+    {% endblock %}
+    {% if cl.formset and cl.formset.errors %}
+        <p class="errornote">
+{#        {% if cl.formset.total_error_count == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}#}
+        {% if cl.formset.total_error_count == 1 %}Please correct the error below.{% else %}Please correct the errors below.{% endif %}
+        </p>
+        {{ cl.formset.non_form_errors }}
+    {% endif %}
+    <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+      <div class="changelist-form-container">
+        {% block search %}{% search_form cl %}{% endblock %}
+        {% block date_hierarchy %}{% if cl.date_hierarchy %}{% date_hierarchy cl %}{% endif %}{% endblock %}
+
+        <form id="changelist-form" method="post"{% if cl.formset and cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+        {% if cl.formset %}
+          <div>{{ cl.formset.management_form }}</div>
+        {% endif %}
+
+            <div id="data-table">
+                {% for department in departments %}
+                    {% include 'parts/department.html' with department=department %}
+                {% endfor %}
+            </div>
+        </form>
+      </div>
+      {% block filters %}
+        {% if cl.has_filters %}
+          <div id="changelist-filter">
+{#            <h2>{% translate 'Filter' %}</h2>#}
+              <h2>Filter</h2>
+            {% if cl.has_active_filters %}<h3 id="changelist-filter-clear">
+{#              <a href="{{ cl.clear_all_filters_qs }}">&#10006; {% translate "Clear all filters" %}</a>#}
+              <a href="{{ cl.clear_all_filters_qs }}">&#10006; Clear all filters</a>
+            </h3>{% endif %}
+            {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+          </div>
+        {% endif %}
+      {% endblock %}
+    </div>
+  </div>
+    <script>
+        (function($){ $(document).ready(function(){
+
+            $( "a[href*='__month']" ).css('display', 'none');
+          });
+        })(django.jQuery);
+    </script>
+
+
+{% endblock %}
+
+<!-- Override extrahead to add Chart.js -->
+{% block content_title %}
+    {% get_ticket cl.result_list as get_ticket %}
+    {% get_hotel cl.result_list as get_hotel %}
+    {% get_visa cl.result_list as get_visa %}
+    {% get_reg cl.result_list as get_reg %}
+    <h1 class="total">
+
+        <span>AirTicket: {{ get_ticket | intcomma }}</span>
+        <span>Hotel: {{ get_hotel | intcomma }}</span>
+        <span>Visa: {{ get_visa | intcomma }}</span>
+        <span>Reg: {{ get_reg | intcomma }}</span>
+    </h1>
+    <style>
+        .total span {
+            padding: 10px;
+            background-color: #79AEC8;
+            color: #fff;
+
+        }
+        #changelist-form{
+            padding: 15px 0px;
+        }
+
+
+        .department-item {
+        /* display: flex; */
+        }
+
+        div#data-table {
+            display: flex;
+        }
+
+        .department-item .title {
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .report-types {
+            display: flex;
+            {#margin: 10px;#}
+        }
+
+        .report-type {
+            {#margin: 10px;#}
+        }
+        .report-type>div {
+            padding: 5px;
+        }
+
+        .report-data {
+            {#border: 1px solid red;#}
+        }
+
+        .report-data span.data-items {
+            display: block;
+            border-bottom: 1px solid;
+        }
+        .report-types + div {
+            display: none !important;
+        }
+    </style>
+{% endblock %}
+
+
+

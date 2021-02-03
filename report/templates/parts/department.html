@@ -1,0 +1,29 @@
+{% load custom_tags %}
+<div class="department-item">
+    <div class="title">
+        {{ department }}
+    </div>
+    <div class="report-types">
+        {% now "Y" as current_year %}
+        {% call_method department 'get_report_types' request.GET.company_offered__personal_manager__guest__airtickets__date__year|default:current_year as report_types %}
+
+        {% for report_type in report_types %}
+            <div class="report-type">
+                <div class="report-title">{{ report_type.title }}</div>
+                <div class="report-data">
+
+                    {% for datum in report_type.data %}
+                        <span class="data-items">{{ datum }}</span>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+<style>
+
+</style>

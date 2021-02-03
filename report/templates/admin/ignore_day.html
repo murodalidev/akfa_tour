@@ -1,0 +1,70 @@
+
+{% extends 'admin/change_list.html' %}
+{% load report_tag humanize %}
+
+{% block content %}
+    {{ block.super }}
+    <script>
+        (function($){ $(document).ready(function(){
+
+            $( "a[href*='__day']" ).css('display', 'none');
+            $('#toggle-filter').click(function () {
+                $('#changelist-filter').toggle('fast')
+            })
+
+            $('#changelist-filter > h3').each(function(){
+                var $title = $(this);
+                $title.click(function(){
+                    $title.next().slideToggle();
+                });
+            });
+            $('#changelist-filter > h3').css('cursor', 'pointer');
+            var toggle_flag = true;
+            $('#changelist-filter > h2').click(function () {
+                toggle_flag = ! toggle_flag;
+                $('#changelist-filter > ul').each(function(){
+                        $(this).toggle(toggle_flag);
+                });
+            });
+          });
+        })(django.jQuery);
+    </script>
+{% endblock %}
+
+<!-- Override extrahead to add Chart.js -->
+{#{% block content_title %}#}
+{#    {% get_total_uzs cl.result_list as total_uzs %}#}
+{#    {% get_total_usd cl.result_list as total_usd %}#}
+{#    <h1 class="total">#}
+{##}
+{##}
+{#        {% if total_uzs and total_usd %}#}
+{#        <span>Total: {{ total_uzs|intcomma }}</span>#}
+{#        <span>Total: {{ total_usd | intcomma }}</span>#}
+{##}
+{#        {% elif total_uzs %}#}
+{#        <span>Total: {{ total_uzs|intcomma }}</span>#}
+{##}
+{#        {% elif total_usd %}#}
+{#        <span>Total: {{ total_usd | intcomma }}</span>#}
+{##}
+{#        {% else %}#}
+{#            {{ block.super }}#}
+{#        {% endif %}#}
+{#    </h1>#}
+{#    <style>#}
+{#        .total span {#}
+{#            padding: 10px;#}
+{#            background-color: #79AEC8;#}
+{#            color: #fff;#}
+{##}
+{#        }#}
+{#    </style>#}
+{#{% endblock %}#}
+
+{% block object-tools-items %}
+  <li><a id="toggle-filter" href="#" class="viewsitelink">Toggle Filter</a></li>
+    {{ block.super }}
+{% endblock %}
+
+

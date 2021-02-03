@@ -1,0 +1,61 @@
+
+{% extends 'admin/change_list.html' %}
+{% load report_tag %}
+{% load humanize %}
+
+{% block content %}
+    {{ block.super }}
+    <script>
+        (function($){ $(document).ready(function(){
+
+            $( "a[href*='__month']" ).css('display', 'none');
+            $( "a[href*='__day']" ).css('display', 'none');
+            $('#toggle-filter').click(function () {
+                $('#changelist-filter').toggle('fast')
+            })
+
+            $('#changelist-filter > h3').each(function(){
+                var $title = $(this);
+                $title.click(function(){
+                    $title.next().slideToggle();
+                });
+            });
+            $('#changelist-filter > h3').css('cursor', 'pointer');
+            var toggle_flag = true;
+            $('#changelist-filter > h2').click(function () {
+                toggle_flag = ! toggle_flag;
+                $('#changelist-filter > ul').each(function(){
+                        $(this).toggle(toggle_flag);
+                });
+            });
+          });
+        })(django.jQuery);
+    </script>
+{% endblock %}
+
+<!-- Override extrahead to add Chart.js -->
+{% block content_title %}
+    {% get_airticket cl.result_list as get_airticket %}
+    <h1 class="total">
+
+
+        <span>Total: {{ get_airticket|intcomma }}</span>
+
+{#            {{ block.super }}#}
+    </h1>
+    <style>
+        .total span {
+            padding: 10px;
+            background-color: #79AEC8;
+            color: #fff;
+
+        }
+    </style>
+{% endblock %}
+
+{% block object-tools-items %}
+  <li><a id="toggle-filter" href="#" class="viewsitelink">Toggle Filter</a></li>
+    {{ block.super }}
+{% endblock %}
+
+

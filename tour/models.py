@@ -1,8 +1,10 @@
-from django.contrib.auth.models import User
-from django.utils import timezone
+from datetime import datetime
+from django.db.models.signals import post_delete, post_save
+from changelog.mixins import ChangeloggableMixin
+from changelog.signals import journal_save_handler, journal_delete_handler
 
+from django.contrib.auth.models import User
 from database.models import *
-from django.utils.html import mark_safe
 
 payment = (
     ('transfer', 'Perechesleniya'),
@@ -12,157 +14,59 @@ payment = (
 )
 
 
-class GuestInfo(models.Model):
+class GuestInfo(ChangeloggableMixin, models.Model):
     guest_full_name = models.CharField(max_length=100, verbose_name='FISH')
     passport_id = models.CharField(max_length=15, verbose_name='Passport')
     citizenship = models.ForeignKey(Citizenship, on_delete=models.CASCADE, verbose_name='Fuqaroligi')
     foreign_company = models.CharField(max_length=100, verbose_name='Xorijiy tashkilot nomi')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='Sana')
+    created_date = models.DateField(null=True, blank=True, default=timezone.now, verbose_name='Sana')
 
     def __str__(self):
         return self.guest_full_name
 
     class Meta:
         ordering = ('-created_date', )
-        verbose_name_plural = "      Guest All Information"
-
-    # def v_employee(self):
-    #     employee = Visa.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.employee) for item in employee)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_employee.short_description = 'Xizmat ko\'rsatuvchi xodim'
-    #
-    # def p_m_c_o(self):
-    #     personal = PersonalManager.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.company_offered) for item in personal)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # p_m_c_o.short_description = 'Taklif qiluvchi tashkilot nomi'
-    #
-    # def v_c_g_come_d(self):
-    #     come_date = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.guest_come_date) for item in come_date)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_g_come_d.short_description = 'Mehmon keldi'
-    #
-    # def v_c_g_back_d(self):
-    #     back_date = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.guest_come_date) for item in back_date)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_g_back_d.short_description = 'Mehmon ketdi'
-    #
-    # def v_c_g_l_a(self):
-    #     guest_living_address = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.guest_living_address) for item in guest_living_address)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_g_l_a.short_description = 'Istiqomat qilayotgan manzili'
-    #
-    # def v_c_g_l_a_t(self):
-    #     guest_living_address_type = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.guest_living_address_type) for item in guest_living_address_type)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_g_l_a_t.short_description = 'Yashash joyi turi'
-    #
-    # def v_c_r_d(self):
-    #     registration_date = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.registration_date) for item in registration_date)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_r_d.short_description = 'Propiska middati'
-    #
-    # def v_c_v_v_d(self):
-    #     visa_validate_date = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.visa_validate_date) for item in visa_validate_date)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_v_v_d.short_description = 'Viza amal qilish muddati'
-    #
-    # def v_c_l_d(self):
-    #     license_date = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.license_date) for item in license_date)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_l_d.short_description = 'Litsenziya muddati'
-    #
-    # def p_m_p_m(self):
-    #     personal_manager = PersonalManager.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.personal_manager) for item in personal_manager)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # p_m_p_m.short_description = 'Taklif qiluvchi tashkilot nomi'
-    #
-    # def v_c_g_s(self):
-    #     guest_status = VisaControl.objects.filter(guest=self.id)
-    #     to_return = '<ul style="margin: 0px !important">'
-    #     to_return += '\n'.join(
-    #         '<li>{}</li>'.format(item.guest_status) for item in guest_status)
-    #     to_return += '</ul>'
-    #     return mark_safe(to_return)
-    #
-    # v_c_g_s.short_description = 'Keldi/Ketti'
+        verbose_name_plural = "1. Guest All Information"
 
 
-class PersonalManager(models.Model):
+post_save.connect(journal_save_handler, sender=GuestInfo)
+post_delete.connect(journal_delete_handler, sender=GuestInfo)
+
+
+class PersonalManager(ChangeloggableMixin, models.Model):
     date = models.DateField(null=True, blank=True, default=timezone.now, verbose_name='Sana')
-    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon')
-    company_offered = models.ForeignKey(CompanyOffered, on_delete=models.CASCADE,
+    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon', related_name='personal_managers')
+    company_offered = models.ForeignKey(CompanyOffered, on_delete=models.CASCADE, related_name='personal_manager',
                                         verbose_name='Taklif qiluvchi tashkilot nomi')
     personal_manager = models.CharField(max_length=100, verbose_name='Mas\'ul shaxs')
-    personal_manager_phone = models.CharField(max_length=15, verbose_name='Mas\'ul shaxsning\ntelefon raqami')
+    personal_manager_phone = models.CharField(max_length=9, verbose_name='Mas\'ul shaxsning\ntelefon raqami')
 
     def __str__(self):
         return f'{self.personal_manager}  ||  {self.company_offered}'
 
     class Meta:
         ordering = ('-date', )
-        verbose_name_plural = "     Personal Manager"
+        verbose_name_plural = "2. Personal Manager"
 
 
-class VisaCity(models.Model):
+post_save.connect(journal_save_handler, sender=PersonalManager)
+post_delete.connect(journal_delete_handler, sender=PersonalManager)
+
+
+class VisaCity(ChangeloggableMixin, models.Model):
     date = models.DateField(null=True, blank=True, default=timezone.now, verbose_name='Sana')
-    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon')
+    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon', related_name='mid')
     pass_visa_date = models.DateField(null=True, blank=True, verbose_name='Vizaga hujjat topshirilgan sana')
     present_visa_date = models.DateField(null=True, blank=True, verbose_name='Viza taqdim etilgan sana')
     guest_come_date = models.DateField(null=True, blank=True, verbose_name='Mehmon keldi')
     guest_back_date = models.DateField(null=True, blank=True, verbose_name='Mehmon keldi')
+    price = models.FloatField(null=True, blank=True, verbose_name='Narxi', default=300000.0)
     employee = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Agent')
-    payment_type_to_visa = models.CharField(choices=payment, default='transfer', max_length=50,
+    payment_type = models.CharField(choices=payment, default='transfer', max_length=50,
                                             verbose_name='To\'lov statusi')
+    visa_days = models.CharField(max_length=100, null=True, blank=True, verbose_name='Visa olingan kundan')
+    status = models.CharField(max_length=100, null=True, blank=True, verbose_name='Holati')
+
 
     def __str__(self):
         return f'Visa to {self.guest}'
@@ -186,16 +90,20 @@ class VisaCity(models.Model):
 
     class Meta:
         ordering = ('-date', )
-        verbose_name_plural = "    Visa City"
+        verbose_name_plural = "3. Visa City"
 
 
-class AirTicket(models.Model):
+post_save.connect(journal_save_handler, sender=VisaCity)
+post_delete.connect(journal_delete_handler, sender=VisaCity)
+
+
+class AirTicket(ChangeloggableMixin, models.Model):
     citizen = (
         ('foreign', 'Ne Rezident'),
         ('local', 'Rezident'),
     )
     date = models.DateField(null=True, blank=True, default=timezone.now, verbose_name='Sana')
-    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon')
+    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon', related_name='airtickets')
     guest_full_name_visa = models.CharField(max_length=100, verbose_name='FISH', null=True, blank=True)
     citizen = models.CharField(choices=citizen, default='foreign', max_length=50, verbose_name='Fuqaroligi')
     trip_goal = models.CharField(max_length=255, null=True, blank=True, verbose_name='Safar maqsadi',
@@ -207,10 +115,8 @@ class AirTicket(models.Model):
     flight_come_date = models.DateField(verbose_name='Kelgan reys', null=True, blank=True)
     flight_back_date = models.DateField(verbose_name='Ketgan reys', null=True, blank=True)
     carrier = models.ForeignKey(Carrier, on_delete=models.CASCADE, verbose_name='Aviatashuvchi')
-    ticket_price = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
-                                       verbose_name='Bilet narxi')
-    payment_type_to_ticket = models.CharField(choices=payment, default='transfer', max_length=50,
-                                              verbose_name='To\'lov statusi')
+    price = models.FloatField(null=True, blank=True, verbose_name='Bilet narxi')
+    payment_type = models.CharField(choices=payment, default='transfer', max_length=50,  verbose_name='To\'lov statusi')
 
     def __str__(self):
         return f'Ticket to {self.guest}'
@@ -227,22 +133,23 @@ class AirTicket(models.Model):
 
     class Meta:
         ordering = ('-date', )
-        verbose_name_plural = "   Air Ticket"
+        verbose_name_plural = "4. Air Ticket"
 
 
-class Hotel(models.Model):
+post_save.connect(journal_save_handler, sender=AirTicket)
+post_delete.connect(journal_delete_handler, sender=AirTicket)
+
+
+class Hotel(ChangeloggableMixin, models.Model):
     date = models.DateField(null=True, blank=True, default=timezone.now, verbose_name='Sana')
-    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon')
+    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon', related_name='hotels')
     hotel_name = models.CharField(max_length=100, verbose_name='Mehmonxona')
     guest_come_date = models.DateField(verbose_name='Mexmon kirgan kuni', default=timezone.now, null=True, blank=True)
     guest_back_date = models.DateField(verbose_name='Mexmon chiqqan kuni', null=True, blank=True)
     employee = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Agent')
-    hotel_price_uzs = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
-                                          verbose_name='Narxi (so\'mda)')
-    hotel_price_us = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
-                                         verbose_name='Narxi ($ da)')
-    payment_type_to_hotel = models.CharField(choices=payment, default='transfer', max_length=50,
-                                             verbose_name='To\'lov statusi')
+    price = models.FloatField(null=True, blank=True, verbose_name='Narxi (so\'mda)')
+    hotel_days = models.CharField(max_length=100, null=True, blank=True, verbose_name='Yashagan kunlar')
+    payment_type = models.CharField(choices=payment, default='transfer', max_length=50, verbose_name='To\'lov statusi')
 
     def __str__(self):
         return f'Hotel to {self.guest}'
@@ -263,18 +170,19 @@ class Hotel(models.Model):
 
     class Meta:
         ordering = ('-date', )
-        verbose_name_plural = "  Hotel"
+        verbose_name_plural = "5. Hotel"
 
 
-class OtherDocument(models.Model):
+post_save.connect(journal_save_handler, sender=Hotel)
+post_delete.connect(journal_delete_handler, sender=Hotel)
+
+
+class OtherDocument(ChangeloggableMixin, models.Model):
     date = models.DateField(null=True, blank=True, default=timezone.now, verbose_name='Sana')
-    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon')
-    visa_price_uzs = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
-                                         verbose_name='Bilet narxi (so\'mda)')
-    visa_price_us = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2,
-                                        verbose_name='Bilet narxi ($ da)')
+    guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon', related_name='others')
+    price = models.FloatField(null=True, blank=True,  verbose_name='Narxi (so\'mda)')
     employee = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Agent')
-    payment_type_to_visa = models.CharField(choices=payment, default='transfer', max_length=50,
+    payment_type = models.CharField(choices=payment, default='transfer', max_length=50,
                                             verbose_name='To\'lov statusi')
 
     def __str__(self):
@@ -296,10 +204,14 @@ class OtherDocument(models.Model):
 
     class Meta:
         ordering = ('-date', )
-        verbose_name_plural = " Other Documents"
+        verbose_name_plural = "6. Other Documents"
 
 
-class VisaControl(models.Model):
+post_save.connect(journal_save_handler, sender=OtherDocument)
+post_delete.connect(journal_delete_handler, sender=OtherDocument)
+
+
+class VisaControl(ChangeloggableMixin, models.Model):
     status = (
         ('come', 'Keldi'),
         ('leave', 'Qaytib ketti'),
@@ -314,7 +226,7 @@ class VisaControl(models.Model):
     guest = models.ForeignKey(GuestInfo, on_delete=models.CASCADE, verbose_name='Mehmon')
     employee = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Agent')
     guest_come_date = models.DateField(null=True, blank=True, verbose_name='Mehmon keldi')
-    guest_back_date = models.DateField(null=True, blank=True, verbose_name='Mehmon keldi')
+    guest_back_date = models.DateField(null=True, blank=True, verbose_name='Mehmon ketdi')
     guest_living_address = models.CharField(null=True, blank=True, max_length=255,
                                             verbose_name='Istiqomat qilayotgan manzil')
     guest_living_address_type = models.CharField(null=True, blank=True, choices=living_address_type, default='flat',
@@ -323,7 +235,8 @@ class VisaControl(models.Model):
     visa_validate_date = models.DateField(null=True, blank=True, verbose_name='Visa amal qilish muddati')
     license_date = models.DateField(null=True, blank=True, verbose_name='Litsenziya muddati')
     possible_leave_date = models.DateField(null=True, blank=True, verbose_name='Ehtimoliy ketish kuni')
-    note = models.CharField(max_length=255, null=True, blank=True, verbose_name='Eslatma')
+    # note = models.CharField(max_length=255, null=True, blank=True, verbose_name='Eslatma')
+    visa_days = models.CharField(max_length=100, null=True, blank=True, verbose_name='Kunlar soni')
     guest_status = models.CharField(choices=status, max_length=50, default='come',
                                     verbose_name='keldi/Ketdi')
 
@@ -346,4 +259,8 @@ class VisaControl(models.Model):
 
     class Meta:
         ordering = ('-date', )
-        verbose_name_plural = "Visa Control"
+        verbose_name_plural = "7. Visa Control"
+
+
+post_save.connect(journal_save_handler, sender=VisaControl)
+post_delete.connect(journal_delete_handler, sender=VisaControl)

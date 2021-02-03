@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -31,18 +33,48 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_menu',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'django_crontab',
+    'django.contrib.humanize',
+
+    'rangefilter',
+    'database',
     'tour',
     'registration.apps.RegistrationConfig',
-    'database',
-    'rangefilter',
+    'report.apps.ReportConfig',
+    'changelog.apps.ChangelogConfig',
 ]
+ADMIN_STYLE = {
+    'background': 'white',
+    'primary-color': '#205280',
+    'primary-text': '#d6d5d2',
+    'secondary-color': '#3B75AD',
+    'secondary-text': 'white',
+    'tertiary-color': '#F2F9FC',
+    'tertiary-text': 'black',
+    'breadcrumb-color': 'whitesmoke',
+    'breadcrumb-text': 'black',
+    'focus-color': '#eaeaea',
+    'focus-text': '#666',
+    'primary-button': '#26904A',
+    'primary-button-text':' white',
+    'secondary-button': '#999',
+    'secondary-button-text': 'white',
+    'link-color': '#333',
+    'link-color-hover': 'lighten($link-color, 20%)',
+    'logo-width': 'auto',
+    'logo-height': '35px'
+}
+# MENU_WEIGHT = {
+#     'World': 20,
+#     'Auth': 4,
+#     'Sample': 5
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -52,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'changelog.middleware.LoggedInUserMiddleware',
 ]
 
 ROOT_URLCONF = 'akfa_tour.urls'
@@ -80,8 +113,12 @@ WSGI_APPLICATION = 'akfa_tour.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.tour_db',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'akfa_tour',
+        'USER': 'akfa',
+        'PASSWORD': 'akfa',
+        'HOST': 'localhost',
+        'PORT': 5432
     }
 }
 
@@ -113,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'Asia/Tashkent'
 
@@ -125,9 +162,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    os.path.join(BASE_DIR, 'static')
 ]
-
-
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
